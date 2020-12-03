@@ -14,13 +14,20 @@ input <- input_in %>%
   pivot_longer(-Row) %>%
   mutate(Column=parse_number(name))
 
+down_the_hill <- function(right, down){
+  Row <- seq(1, by=down, to = length)
+  
+  Column <- seq(1, by=right, length.out=length(Row))
+  Column <- ((Column-1) %% width)+1
+  
+  Hits <- tibble(Row=Row, Column=Column)
+  
+  Hits %>% 
+    left_join(input, by=c("Row", "Column")) %>%
+    filter(value=="#") %>%
+    nrow()
+}
 
-Column <- seq(1, by=3, length.out=length)
-Column <- ((Column-1) %% width)+1
+trees <- map2_int(c(1, 3, 5, 7, 1), c(1, 1, 1, 1, 2), down_the_hill)
 
-Hits <- tibble(Row=1:length, Column=Column)
-
-Hits %>% 
-  left_join(input, by=c("Row", "Column")) %>%
-  filter(value=="#") %>%
-  nrow()
+prod(trees)
