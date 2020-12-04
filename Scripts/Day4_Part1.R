@@ -13,13 +13,11 @@ pass_info_df <- tibble(pass_glob=str_trim(pass_info_vec)) %>%
   pivot_longer(cols=-ID, values_drop_na = TRUE) %>%
   select(-name) %>%
   separate(value, into=c("field", "value"), sep=":") %>%
-  pivot_wider(id_cols=ID, names_from=field, values_from=value) %>%
-  mutate(Valid=!is.na(byr)&!is.na(iyr)&!is.na(eyr)&!is.na(hgt)&!is.na(hcl)&!is.na(ecl)&!is.na(pid))
+  pivot_wider(id_cols=ID, names_from=field, values_from=value)
 
 pass_info_df
 
-
 pass_info_df %>%
   select(-cid) %>%
-  complete.cases() %>%
-  sum()
+  filter(complete.cases(.)) %>%
+  nrow()
