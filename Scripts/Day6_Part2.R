@@ -7,37 +7,35 @@ input_in <- read_file(here("Input", "input_day6.txt"))
 
 
 ## split input whenever there is a blank line to show new group
-## remove the new lines
 
 input_parse <- str_split(input_in, pattern="\n\n", simplify = TRUE) %>%
   as.vector()
 
 check_group <- function(char){
+  # if the string ends in new line, remove the new line as this caused issues
+  if (str_ends(char, "\n")) char <- str_sub(char, 1, str_length(char)-1)
+
+  # split by new line
+  # collapse everything
+  # find the unique characters
   char2 <- str_split(char, "\n", simplify = TRUE) %>%
     str_replace_all(" ", "") %>%
     str_split("") %>%
-    map(unique)
+    map(unique) 
   
-  if (length(char2)>1){
-    char3 <- char2[[1]]
-    for (i in 2:length(char2)){
-      char3 <- intersect(char3, char2[[i]])
-    }
-  } else {
-    char3 <- char2[[1]]
-  }
-  str_c(sort(char3), collapse="")
+  # find the intersection among all people
+  str_c(Reduce(intersect, char2), collapse="")  
+
 }
 
 input_test <- list(`1`=c("abc"),
-                   `2`=c("a", "b", "c"),
-                   `3`=c("ab", "ac"),
-                   `4`=rep("a", 4),
-                   `5`="b")
-input_test %>% map_chr(check_group) 
+                   `2`=c("a\nb\nc"),
+                   `3`=c("ab\nac"),
+                   `4`=str_c("a", sep="\n"),
+                   `5`="b\n")
+input_test %>% map_chr(check_group) %>% map_int(str_length)
 
 uniques <- input_parse %>% map_chr(check_group) 
 uniques %>%
   map_int(str_length) %>%
   sum()
-# 3484 is too low
