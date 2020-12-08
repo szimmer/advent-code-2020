@@ -28,3 +28,5 @@ while (!stopit){
     hist <- c(hist, idx)
   }
 }
+
+accumulator
