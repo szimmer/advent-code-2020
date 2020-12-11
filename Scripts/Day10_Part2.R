@@ -3,6 +3,24 @@ library(tidyverse)
 
 input_in <- read_csv(here("Input", "input_day10.txt"), col_names = FALSE)
 
+# run of 5: 1,2,3,4,5 - 7 combos 
+# 1,2,3,4,5
+# 1,2,3,5
+# 1,3,4,5
+# 1,2,4,5
+# 1,2,5
+# 1,3,5
+# 1,4,5
+# run of 4: 1,2,3,4 - 4 combos
+# 1,2,3,4
+# 1,2,4
+# 1,3,4
+# 1,4
+# run of 3: 1,2,3 - 2 comboos
+# 1,2,3
+# 1,3
+# everything else is 1.
+
 
 ans2_df <- input_in %>% 
   add_row(X1=c(0, max(input_in$X1)+3)) %>% #add the charging outlet and one that is 3 higher than max
@@ -12,8 +30,8 @@ ans2_df <- input_in %>%
          Group=cumsum(Group_ord)) %>%
   count(Group) %>%
   mutate(Ways=case_when(
-    n==5~7,#choose(4,4)+choose(4,2)+choose(4,3)
-    n==4~4, #choose(3, 3)+choose(3,2)
+    n==5~7,#from enumeration above
+    n==4~4,
     n==3~2,
     n==2~1,
     TRUE~1
