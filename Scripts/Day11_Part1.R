@@ -1,5 +1,6 @@
 library(here)
 library(tidyverse)
+library(simecol)
 
 # input_in <- read_csv(
 # "L.LL.LL.LL
@@ -30,39 +31,20 @@ input <-
   mutate_all(make_num) %>%
   as.matrix()
 
-occ_nbrs_cnt <- function(i, j, layout){
-  rows <- max(i-1, 1):min(i+1, length)
-  cols <- max(j-1, 1):min(j+1, width)
-  nbrs_idx <- expand_grid(row=rows, col=cols) %>%
-    filter(!(row == i & col == j)) %>%
-    as.matrix()
-  
-  nbrs <- layout[nbrs_idx]
-  
-  sum(nbrs, na.rm=TRUE)
+occ_nbrs_cnt <- function(mat) {
+
+  mat[is.na(mat)] <- 0
+  eightneighbors(mat)
   
 }
 
+
 change_seats <- function(cur_layout){
-  next_layout <- cur_layout 
-  for (i in 1:nrow(cur_layout)){
-    for (j in 1:ncol(cur_layout)){
-      if (is.na(cur_layout[i, j])){
-        # do nothing
-      } else if (cur_layout[i , j]==0){ # seat is empty
-        n_occ_nbrs <- occ_nbrs_cnt(i, j, cur_layout)
-        # print(glue::glue("i={i}, j={j}, n_occ_nbrs={n_occ_nbrs}"))
-        if (n_occ_nbrs==0){
-          next_layout[i, j] <- 1
-          }
-      } else if (cur_layout[i, j]==1){ # seat is occupied
-        n_occ_nbrs <- occ_nbrs_cnt(i, j, cur_layout)
-        if (n_occ_nbrs >= 4){
-          next_layout[i, j] <- 0
-          }
-      }
-    }
-  }
+  nnbrs <- occ_nbrs_cnt(cur_layout)
+  next_layout <- cur_layout
+  next_layout[cur_layout==0 & nnbrs==0] <- as.integer(1)
+  next_layout[cur_layout==1 & nnbrs>=4] <- as.integer(0)
+  
   return(next_layout)
 }
 
@@ -72,8 +54,8 @@ shuffles <- 0
 
 while (change){
   next_plan <- change_seats(cur_plan)
-  check.equal <- all.equal(cur_plan, next_plan)
-  if (isTRUE(check.equal)){
+  check.equal <- all(near(abs(cur_plan-next_plan), 0), na.rm = TRUE)
+  if (check.equal){
     change <- FALSE
   } else{
     cur_plan <- next_plan
